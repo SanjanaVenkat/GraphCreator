@@ -8,6 +8,7 @@ Vertex* addvertex(Vertex* root);
 void printVertices(Vertex* root);
 void printTable(Vertex* root, int array[20][20]);
 int addEdge(Vertex* root, int array[20][20]);
+void shortestPath(Vertex* root, int array[20][20]);
 
 Vertex* addvertex(Vertex* root) {
   char vertexlabel[1];
@@ -15,7 +16,7 @@ Vertex* addvertex(Vertex* root) {
   cout << "Adding vertex" << endl;
   cout << "Enter a letter to be the label of your vertex" << endl;
   cin >> vertexlabel;
-  Vertex* vertex = new Vertex(vertexlabel, 0, 0);
+  Vertex* vertex = new Vertex(vertexlabel, 0, 0, false);
   cout << "Vertex has been added" << endl;
   if (current == NULL) {
     current = vertex;
@@ -86,7 +87,6 @@ int addEdge(Vertex* root, int array[20][20]) {
     counter++;
     current = current->getNext();
   }
-  //  cout << firstcounter << " " << secondcounter << endl;
   int edgeweight;
   cout << "Enter the weight of the edge" << endl;
   cin >> edgeweight;
@@ -94,7 +94,76 @@ int addEdge(Vertex* root, int array[20][20]) {
   return edgeweight;
 }
 
+void shortestPath(Vertex* root, int array[20][20]) {
+  char firstnode[1000];
+  char secondnode[1000];
+  cout << "Enter the label of the node that your path will start from" << endl;
+  cin >> firstnode;
+  cout << "Enter the label of the node that your path will end on" << endl;
+  cin >> secondnode;
+ int counter = 0;
+  int firstcounter = 0;
+  int secondcounter = 0;
+  Vertex* current = root;
+  Vertex* traveller;
+  while (current != NULL) {
+    //    counter++;
+    if(strcmp(current->getLabel(), firstnode) == 0) {
+      firstcounter = counter;
+      current->setVisited(true);
+      traveller = root;
+    }
+    if (strcmp(current->getLabel(), secondnode) == 0) {
+      secondcounter = counter;
+    }
+    counter++;
+    current = current->getNext();
+  }
+  int totaldistance = 0;
+  int currentdistance = 0;
+  Vertex* mover;
+  current = root;
+  for (int j = 0; j < counter; j++) {
+    current->setDistance(array[firstcounter][j]);
+    current = current->getNext();
+  }
+  current = root;
+  while (current != NULL) {
+    //cout << "Test start" << endl;
+    if (current->getDistance() == 0) {
+      current = current->getNext();
+    }
+    if (strcmp(current->getLabel(), firstnode) == 0) {
+      current = current->getNext();
+      }
+    if (strcmp(current->getLabel(), secondnode) == 0 && current->getDistance() > 0) {
+      totaldistance = totaldistance + current->getDistance();
+      cout << "Distance: " << totaldistance << endl;
+      return;
+    }
+    if (strcmp(current->getLabel(), firstnode) != 0 && strcmp(current->getLabel(), secondnode) != 0) {
+        if (current->getDistance() < currentdistance || currentdistance == 0) {
+	  if (current->getVisited() == false && current->getDistance() > 0) {
+	  mover = current;
+	  currentdistance = current->getDistance();
+	  current = current->getNext();
+	}
+	}
+    }
+    //	cout << "Here" << endl;
+     if (current->getNext() == NULL) {
+	totaldistance = totaldistance + currentdistance;
+	cout << "Test" << endl;
+	strcpy(firstnode, mover->getLabel());
+	//cout << "Test" << endl;
+	current->setNext(root);
+	current = current->getNext();
+	//	cout << current->getLabel() << endl;
+    }
+  }
 
+  
+}
 
 
 int main() {
@@ -128,6 +197,7 @@ int main() {
   }
   if (response == 5) {
     cout << "Find shortest path" << endl;
+    shortestPath(root, array);
     cout << "Enter 1 to add vertex, 2 to add edge, 3 to remove vertex, 4 to remove edge, 5 to find shortest path, and 6 to print the adjacency table" << endl;
   cin >> response;
   }

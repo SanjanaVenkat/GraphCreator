@@ -4,11 +4,12 @@
 
 using namespace std;
 
-Vertex::Vertex(char* l, int e, int d) {
+Vertex::Vertex(char* l, int e, int d, bool v) {
   next = NULL;
   edge = e;
   distance = d;
   strcpy(label, l);
+  visited = v;
 }
 
 Vertex::~Vertex() {
@@ -47,4 +48,10 @@ char* Vertex::getLabel() {
   return label;
 }
 
+void Vertex::setVisited(bool v) {
+  visited = v;
+}
 
+bool Vertex::getVisited() {
+  return visited;
+}
