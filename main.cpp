@@ -106,6 +106,9 @@ void shortestPath(Vertex* root, int array[20][20]) {
   int secondcounter = 0;
   Vertex* current = root;
   Vertex* traveller;
+  int totaldistance = 0;
+  int currentdistance = 0;
+  Vertex* mover;
   while (current != NULL) {
     //    counter++;
     if(strcmp(current->getLabel(), firstnode) == 0) {
@@ -116,19 +119,23 @@ void shortestPath(Vertex* root, int array[20][20]) {
     if (strcmp(current->getLabel(), secondnode) == 0) {
       secondcounter = counter;
     }
+    //    if (current->getNext() != NULL) {
     counter++;
+    //}
     current = current->getNext();
-  }
-  int totaldistance = 0;
-  int currentdistance = 0;
-  Vertex* mover;
+  //  int totaldistance = 0;
+  //int currentdistance = 0;
+  //Vertex* mover;
   current = root;
+  
+  // cout << counter << endl;
   for (int j = 0; j < counter; j++) {
     current->setDistance(array[firstcounter][j]);
+    //cout << "Current distance: " << current->getDistance() << endl;
     current = current->getNext();
   }
+  
   current = root;
-  while (current != NULL) {
     //cout << "Test start" << endl;
     if (current->getDistance() == 0) {
       current = current->getNext();
@@ -137,7 +144,28 @@ void shortestPath(Vertex* root, int array[20][20]) {
       current = current->getNext();
       }
     if (strcmp(current->getLabel(), secondnode) == 0 && current->getDistance() > 0) {
-      totaldistance = totaldistance + current->getDistance();
+      cout << "Total distance: " << totaldistance << endl;
+      Vertex* holder = root;
+      counter = 0;
+      while (holder != NULL) {
+	counter++;
+	if (strcmp(holder->getLabel(), firstnode) == 0) {
+	  firstcounter = counter;
+	}
+	if (strcmp(holder->getLabel(), secondnode) == 0) {
+	  secondcounter = counter;
+	}
+	if (holder->getNext() == root) {
+	  holder->setNext(NULL);
+	}
+	else {
+	holder = holder->getNext();
+	}
+      }
+      cout << "F: " << firstcounter-1 << "S: " << secondcounter-1 << endl;
+      current->setDistance(array[firstcounter-1][secondcounter-1]);
+      cout << "Current distance: " << current->getDistance() << endl;
+      totaldistance = current->getDistance() + totaldistance;
       cout << "Distance: " << totaldistance << endl;
       return;
     }
@@ -146,18 +174,21 @@ void shortestPath(Vertex* root, int array[20][20]) {
 	  if (current->getVisited() == false && current->getDistance() > 0) {
 	  mover = current;
 	  currentdistance = current->getDistance();
+	  cout << "Current distance " << currentdistance << endl;
 	  current = current->getNext();
 	}
 	}
     }
     //	cout << "Here" << endl;
      if (current->getNext() == NULL) {
-	totaldistance = totaldistance + currentdistance;
-	cout << "Test" << endl;
+       totaldistance = totaldistance + currentdistance;
+       //	cout << "Test" << endl;
 	strcpy(firstnode, mover->getLabel());
 	//cout << "Test" << endl;
+	counter = 0;
 	current->setNext(root);
 	current = current->getNext();
+	//	counter = -1;
 	//	cout << current->getLabel() << endl;
     }
   }
