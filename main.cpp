@@ -101,98 +101,135 @@ void shortestPath(Vertex* root, int array[20][20]) {
   cin >> firstnode;
   cout << "Enter the label of the node that your path will end on" << endl;
   cin >> secondnode;
- int counter = 0;
-  int firstcounter = 0;
-  int secondcounter = 0;
-  Vertex* current = root;
-  Vertex* traveller;
   int totaldistance = 0;
-  int currentdistance = 0;
-  Vertex* mover;
+  int moverdistance = 0;
+  int firstcounter = 0;
+  int counter = 0;
+  int secondcounter = 0;
+  int extracounter = 0;
+  Vertex* current = root;
+  bool done = false;
   while (current != NULL) {
-    //    counter++;
-    if(strcmp(current->getLabel(), firstnode) == 0) {
-      firstcounter = counter;
-      current->setVisited(true);
-      traveller = root;
-    }
-    if (strcmp(current->getLabel(), secondnode) == 0) {
-      secondcounter = counter;
-    }
-    //    if (current->getNext() != NULL) {
-    counter++;
-    //}
-    current = current->getNext();
-  //  int totaldistance = 0;
-  //int currentdistance = 0;
-  //Vertex* mover;
-  current = root;
-  
-  // cout << counter << endl;
-  for (int j = 0; j < counter; j++) {
-    current->setDistance(array[firstcounter][j]);
-    //cout << "Current distance: " << current->getDistance() << endl;
-    current = current->getNext();
-  }
-  
-  current = root;
-    //cout << "Test start" << endl;
-    if (current->getDistance() == 0) {
-      current = current->getNext();
-    }
-    if (strcmp(current->getLabel(), firstnode) == 0) {
-      current = current->getNext();
-      }
-    if (strcmp(current->getLabel(), secondnode) == 0 && current->getDistance() > 0) {
-      cout << "Total distance: " << totaldistance << endl;
-      Vertex* holder = root;
-      counter = 0;
-      while (holder != NULL) {
-	counter++;
-	if (strcmp(holder->getLabel(), firstnode) == 0) {
+    //current is root, do setup
+    if (done == false) {
+      cout << "Here" << endl;
+      //counter = 0;
+      //firstcounter = 0;
+      while (current != NULL) {
+	if (strcmp(current->getLabel(), firstnode) == 0) {
 	  firstcounter = counter;
 	}
-	if (strcmp(holder->getLabel(), secondnode) == 0) {
+	if (strcmp(current->getLabel(), secondnode) == 0) {
 	  secondcounter = counter;
 	}
-	if (holder->getNext() == root) {
-	  holder->setNext(NULL);
+	counter++;
+	if (current->getNext() == root) {
+	  current->setNext(NULL);
 	}
-	else {
-	holder = holder->getNext();
-	}
+	current = current->getNext();
       }
-      cout << "F: " << firstcounter-1 << "S: " << secondcounter-1 << endl;
-      current->setDistance(array[firstcounter-1][secondcounter-1]);
-      cout << "Current distance: " << current->getDistance() << endl;
-      totaldistance = current->getDistance() + totaldistance;
-      cout << "Distance: " << totaldistance << endl;
+      done = true;
+    
+    current = root;
+    //        cout << firstcounter << endl;
+    //	cout << counter << endl;
+    if (current == root) {
+      cout << "Firstcounter " << firstcounter << endl;
+    for (int j = 0; j < counter; j++) {
+      //if (firstcounter == 0) {
+      current->setDistance(array[firstcounter][j]);
+      //}
+      //else {
+      //current->setDistance(array[firstcounter-1][j]);
+      //}
+if (current->getNext() == root) {
+          current->setNext(NULL);
+        }
+      current = current->getNext();
+    }
+    }
+    
+    current = root;
+    
+    done = true;
+    }
+    //current is firstnode
+    if (done = true) {
+      //      current = root;
+      cout << "CURRENT: " << current->getLabel()  << endl;
+  if (strcmp(current->getLabel(), secondnode) == 0) {
+      cout << "Second node" << endl;
+      totaldistance = totaldistance + current->getDistance();
+      cout << "Total distance: " << totaldistance << endl;
       return;
     }
-    if (strcmp(current->getLabel(), firstnode) != 0 && strcmp(current->getLabel(), secondnode) != 0) {
-        if (current->getDistance() < currentdistance || currentdistance == 0) {
-	  if (current->getVisited() == false && current->getDistance() > 0) {
-	  mover = current;
-	  currentdistance = current->getDistance();
-	  cout << "Current distance " << currentdistance << endl;
+  else  if (strcmp(current->getLabel(), firstnode) == 0 && strcmp(current->getLabel(), secondnode) != 0) {
+	cout << "First node" << endl;
+	  current->setVisited(true);
+
+	  current = current->getNext();
+	  //	  cout << current->getLabel() << endl;
+	  //	  cout << current->getNext()->getLabel() << endl;
+      }
+    //current is 0 and not firstnode
+      else if (strcmp(current->getLabel(), firstnode) != 0 && current->getDistance() == 0 && extracounter < counter && strcmp(current->getLabel(), secondnode) != 0) {
+      cout << counter << endl;
+      extracounter++;
+      //if (current->getNext() != NULL) {
+      current = current->getNext();
+      //}
+    }
+    //current is secondnode and not zero
+      else if (strcmp(current->getLabel(), secondnode) == 0) {
+      cout << "Second node" << endl;
+      totaldistance = totaldistance + current->getDistance();
+      cout << "Total distance: " << totaldistance << endl;
+      return;
+    }
+    //current is not zero, not visited
+    //current's next is NULL
+      else if (current->getDistance() != 0) {
+      cout << "non 0 node" << endl;
+      if (current->getVisited() == true) {
+	cout << "Skip" << endl;
+	//	if (current->getNext() == root) {
+	//current->setNext(NULL);
+        //}
+
+	current = current->getNext();
+      }
+      else {
+	if (current->getDistance() >= moverdistance) {
+	  cout << "Distance change" << current->getDistance() << endl;
+	  moverdistance = current->getDistance();
+	  totaldistance = totaldistance + moverdistance;
+	  strcpy(firstnode, current->getLabel());
 	  current = current->getNext();
 	}
+	else {
+	  cout << "Skip, not big enough" << endl;
+	  current = current->getNext();
 	}
+      }
+
     }
-    //	cout << "Here" << endl;
-     if (current->getNext() == NULL) {
-       totaldistance = totaldistance + currentdistance;
-       //	cout << "Test" << endl;
-	strcpy(firstnode, mover->getLabel());
-	//cout << "Test" << endl;
-	counter = 0;
-	current->setNext(root);
-	current = current->getNext();
-	//	counter = -1;
-	//	cout << current->getLabel() << endl;
+
+    if (current->getNext() == NULL || current->getNext() == root) {
+      //restart
+      cout << "End" << endl;
+      current->setNext(root);
+      current = current->getNext();
+      counter = 0;
+      firstcounter = 0;
+      done = false;
+      extracounter = 0;
+    }
+    
+    //   cout << "Drop" << endl;
+
     }
   }
-
+  cout << "Out of while loop" << endl;
   
 }
 
