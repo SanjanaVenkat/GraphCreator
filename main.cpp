@@ -1,15 +1,26 @@
+//Sanjana Venkat
+//5.16.19
+//Graph creator
 #include <iostream>
 #include <cstring>
 #include "list.h"
 
 using namespace std;
-
+//functions
 Vertex* addvertex(Vertex* root);
 void printVertices(Vertex* root);
 void printTable(Vertex* root, int array[20][20]);
 int addEdge(Vertex* root, int array[20][20]);
-void shortestPath(Vertex* root, int array[20][20]);
-
+void shortestPath(Vertex* root, int array[20][20], Vertex*& path);
+void clearVertices(Vertex* root);
+int getIndex(Vertex* currentVertex, Vertex* root);
+int getIndexs(char label[1000], Vertex* root);
+Vertex* getVertex(int index, Vertex* root);
+Vertex* addtoPath(Vertex* currentVertex, Vertex* path);
+int removeEdge(Vertex* root, int array[20][20]);
+Vertex* deleteList(Vertex* root);
+int deleteRoot(Vertex* root, int array[20][20]);
+//add vertex to one of the two linked lists
 Vertex* addvertex(Vertex* root) {
   char vertexlabel[1];
   Vertex* current = root;
@@ -30,16 +41,16 @@ Vertex* addvertex(Vertex* root) {
   }
   return root;
 }
-
+//prints list of vertices from linked list
 void printVertices(Vertex* root) {
   Vertex* current = root;
   while (current != NULL) {
-    cout << current->getLabel() << " " << current->getDistance() << endl;
+    cout << current->getLabel() << endl;
     current = current->getNext();
   }
   
 }
-
+//print adjacency table
 void printTable(Vertex* root, int array[20][20]) {
   int counter = 0;
   Vertex* current = root;
@@ -49,12 +60,14 @@ void printTable(Vertex* root, int array[20][20]) {
   }
   current = root;
   cout << "  ";
+  //labels print
   while (current != NULL) {
   cout << current->getLabel() << " ";
   current = current->getNext();
   }
   cout << endl;
   current = root;
+  //values print
   for (int i = 0; i < counter; i++) {
     cout << current->getLabel() << " ";
     for (int j = 0; j < counter; j++) { 
@@ -65,6 +78,7 @@ void printTable(Vertex* root, int array[20][20]) {
   }
 }
 
+//add edge, change array spot from 0 to the value that of the edge
 int addEdge(Vertex* root, int array[20][20]) {
   char firstedge[1000];
   char secondedge[1000];
@@ -94,187 +108,282 @@ int addEdge(Vertex* root, int array[20][20]) {
   return edgeweight;
 }
 
-void shortestPath(Vertex* root, int array[20][20]) {
-  char firstnode[1000];
-  char secondnode[1000];
-  cout << "Enter the label of the node that your path will start from" << endl;
-  cin >> firstnode;
-  cout << "Enter the label of the node that your path will end on" << endl;
-  cin >> secondnode;
-  int totaldistance = 0;
-  int moverdistance = 0;
-  int firstcounter = 0;
-  int counter = 0;
-  int secondcounter = 0;
-  int extracounter = 0;
-  Vertex* current = root;
+//find shortest path
+void shortestPath(Vertex* root, int array[20][20], Vertex*& path) {
+  char sourceLabel[1000];
+  char destLabel[1000];
+  //setup
+  cout << "Enter the label of the vertex that you want to start at" << endl;
+  cin >> sourceLabel;
+  cout << "Enter the label of the vertex that you want to end at" << endl;
+  cin >> destLabel;
+   int currentIndex = getIndexs(sourceLabel, root);
+  int destIndex = getIndexs(destLabel, root);
+  Vertex* destvertex = getVertex(destIndex, root);
+  //cout << destIndex << endl;
+  clearVertices(root);
+  path = NULL;
   bool done = false;
-  while (current != NULL) {
-    firstcounter = 0;
-    secondcounter = 0;
-    counter = 0;
-    //current is root, do setup
-    if (done == false) {
-      cout << "Here" << endl;
-      //counter = 0;
-      //firstcounter = 0;
+   Vertex* sourceVertex = getVertex(currentIndex, root);
+  Vertex* currentVertex = getVertex(currentIndex, root);
+ int shortestNextDistance = 0;
+  Vertex* shortestNextVertex = NULL;
+  path = addtoPath(currentVertex, path);
+  currentVertex->setVisited(true);
+  //  cout << "Printing vertices" << endl;
+  //printVertices(root);
+  //while not found
+  while (done == false) {
+    //found destination
+    if (currentIndex == destIndex) {
+      //  cout << "Breaking " << endl;
+      break;
+    }
+    shortestNextVertex = NULL;
+    shortestNextDistance = 0;
+    //    cout <<"Current label   " <<  currentVertex->getLabel() << " " << currentIndex << endl;
+    //cout << "Destination   " << destIndex << "    " << destLabel << endl;
+    for (int i = 0; i < 20; i++) {
+      /*
+      if (i == destIndex) {
+	 destvertex->setDistance(currentVertex->getDistance() + array[currentIndex][i]);
+	path = addtoPath(destvertex, path);
+	cout << "Path: " << endl;
+	printVertices(path);
+	cout << "Total distance: " << destvertex->getDistance() << "       " << currentVertex->getDistance() << "       " <<array[currentIndex][i] << endl;
+	//cout << "Found end" << endl;
+        done = true;
+        break;
+      }
+      */
+      //no connection, move on
+      if (array[currentIndex][i] == 0) {
+        continue;
+      }
+      //continue
+            if (i == currentIndex) {
+	continue;
+      }
+	    //    cout << "I: " << i << endl;
       
-while (current != NULL) {
-    //    counter++;
-    if(strcmp(current->getLabel(), firstnode) == 0) {
+      Vertex* nextVertex = getVertex(i, root);
+      //cout << "I2: " << i << endl;
+      //stop from crashing
+      if (nextVertex == NULL) {
+	//	printVertices(root);
+	continue;
+      }
+      //skip if visited
+      if (nextVertex->getVisited() == true) {
+	continue;
+      }
+      //      cout << "Test 1" << endl;
+      //change distance
+      if (nextVertex->getDistance() == 0) {
+	//cout << "Test 2" << endl;
+	nextVertex->setDistance(currentVertex->getDistance() + array[currentIndex][i]);
+	//cout << "Next vertex: " << nextVertex->getLabel() << "    " << nextVertex->getDistance() << endl;
+      }
+      //longer distance, dont go this way
+      else if (currentVertex->getDistance() + array[currentIndex][i] <= nextVertex->getDistance()) {
+	//cout << "Test 3" << endl;
+	nextVertex->setDistance(currentVertex->getDistance() + array[currentIndex][i]);
+      }
+      //shorter distance, go this way
+      if (shortestNextDistance == 0 || shortestNextDistance > nextVertex->getDistance()) {
+	//cout << "Test 4" << endl;
+	shortestNextDistance = nextVertex->getDistance();
+	shortestNextVertex = nextVertex;
+      }
+      
+ 
+
+      
+    }
+
+    //      cout << "Check: " << endl;
+    //error
+      if (shortestNextVertex == NULL) {
+	// 	cout << "Error" << endl;
+	done = true;
+      }
+      //cout << "Doing this" << endl;
+      //move on to next
+      else {
+	//cout << "Shortest " <<  shortestNextVertex->getLabel() << endl;
+            path = addtoPath(shortestNextVertex, path);
+            currentIndex = getIndex(shortestNextVertex, root);
+            currentVertex = shortestNextVertex;
+            currentVertex->setVisited(true);
+	    //  cout << "Test 5" << endl;	   
+	    /*
+    Vertex* lastVertex = (last, root);
+    path = addtoPath(lastVertex, path);
+    *//*
+            cout << "Print" << endl;
+            printVertices(path);
+// cout << destLabel << endl;
+            cout << "end of list" << endl;
+      */ 
+//return;
+      }
+  }
+  //print
+  cout << "Path" << endl;
+  printVertices(path);
+  cout << "Distance: " <<  destvertex->getDistance() << endl;
+}
+//clears vertices of linked list
+void clearVertices(Vertex* root) {
+  Vertex* current = root;
+  while (current != NULL) {
+    current->setVisited(false);
+    current->setDistance(0);
+    current = current->getNext();
+  }
+}
+//get index of vertex
+int getIndex(Vertex* currentVertex, Vertex* root) {
+  int counter = 0;
+  Vertex* current = root;
+  while (current != NULL) {
+    if (strcmp(current->getLabel(), currentVertex->getLabel()) == 0) {
+      return counter;
+    }
+    counter++;
+    current = current->getNext();
+  }
+}
+//get index of vertex
+int getIndexs(char label[], Vertex* root) {
+  int counter = 0;
+  Vertex* current = root;
+  while (current != NULL) {
+    if (strcmp(current->getLabel(), label) == 0) {
+      return counter;
+    }
+    counter++;
+    current = current->getNext();
+  }
+}
+//get vertex
+Vertex* getVertex(int index, Vertex* root) {
+  int counter = 0;
+  Vertex* current = root;
+  while (current != NULL) {
+    if (index == counter) {
+      return current;
+    }
+    counter++;
+    current = current->getNext();
+  }
+}
+//add to shortest path
+Vertex* addtoPath(Vertex* currentVertex, Vertex* path) {
+  Vertex* current = path;
+  char label[1000];
+  strcpy(label, currentVertex->getLabel());
+  Vertex* newVertex = new Vertex(label, 0, 0, false);
+  if (current == NULL) {
+    current = newVertex;
+    path = current;
+  }
+  else {
+    while(current->getNext() != NULL) {
+      current = current->getNext();
+    }
+    current->setNext(newVertex);
+
+  }
+  return path;
+}
+//remove edge, change to 0
+int removeEdge(Vertex* root, int array[20][20]) {
+  char firstedge[1000];
+  char secondedge[1000];
+  cout << "Enter the label of the vertex that your edge starts at" << endl;
+  cin >> firstedge;
+  cout << "Enter the label of the vertex that your edge ends at" << endl;
+  cin >> secondedge;
+  int counter = 0;
+  int firstcounter = 0;
+  int secondcounter = 0;
+  Vertex* current = root;
+  while (current != NULL) {
+    if (strcmp(current->getLabel(), firstedge) == 0) {
       firstcounter = counter;
     }
-    if (strcmp(current->getLabel(), secondnode) == 0) {
+    if (strcmp(current->getLabel(), secondedge) == 0) {
       secondcounter = counter;
     }
     counter++;
     current = current->getNext();
   }
- current = root;
- for (int j = 0; j < counter; j++) {
-   current->setDistance(array[firstcounter][j]);
-   current = current->getNext();
- }
- 
-    
+  array[firstcounter][secondcounter] = 0;
+  return 0;
+}
+//delete from linked list
+Vertex* deleteList(Vertex* root) {
+  char todelete[1000];
+  cout << "Reenter the label of the vertex that you want to delete" << endl;
+  cin >> todelete;
+  Vertex* current = root;
+  Vertex* previous = NULL;
+  Vertex* next = current->getNext();
+  while (current != NULL) {
+    if (strcmp(current->getLabel(), todelete) == 0) {
+      break;
     }
-    current = root;
-        //        cout << firstcounter << endl;
-    //	cout << counter << endl;
-    if (current == root) {
-      cout << "Firstcounter " << firstcounter << endl;
-    for (int j = 0; j < counter; j++) {
-      //if (firstcounter == 0) {
-      current->setDistance(array[firstcounter][j]);
-      //}
-      //else {
-      //current->setDistance(array[firstcounter-1][j]);
-      //}
-if (current->getNext() == root) {
-          current->setNext(NULL);
-        }
+    else {
+      previous = current;
       current = current->getNext();
+      next = current->getNext();
     }
+  }
+    if (current == root) {
+      root = next;
     }
-    
-    //current = root;
-    cout << "End here" << endl;
-    done = true;
+    else {
+    previous->setNext(next);
+    }
+    return root;
+
+}
+//delete from array
+int deleteArray(Vertex* root, int array[20][20]) {
+  char todelete[1000];
+  cout << "Which vertex do you want to delete?" << endl;
+  cin >> todelete;
+  int counter = 0;
+  Vertex* current = root;
+  while (current != NULL) {
+    if (strcmp(current->getLabel(), todelete) == 0) {
+      break;
+    }
+    counter++;
+    current = current->getNext();
+  }
+  int icounter = counter;
+  int jcounter = counter;
+  for (int i = icounter + 1; i < 20; i++) {
+    for (int j = 0; j < 20; j++) {
+      array[i-1][j] = array[i][j];
+    }
 
   }
-  current = root;
-  
 
-    //current is firstnode
-    while (done = true) {
-      if (current->getNext() != root) {
-      current = current->getNext();
-      }
-      //      current = root;
-      //cout << "CURRENT: " << current->getLabel()  << endl;
-  if (strcmp(current->getLabel(), secondnode) == 0) {
-      cout << "Second node" << endl;
-      totaldistance = totaldistance + current->getDistance();
-      cout << "Total distance: " << totaldistance << endl;
-      return;
+  for (int i = 0; i < 20; i++) {
+    for (int j = jcounter + 1; j < 20; j++) {
+      array[i][j-1] = array[i][j];
     }
-   if (strcmp(current->getLabel(), firstnode) == 0 && strcmp(current->getLabel(), secondnode) != 0) {
-	cout << "First node" << endl;
-	  current->setVisited(true);
+  }
+  return 0;
 
-	  current = current->getNext();
-	  //	  cout << current->getLabel() << endl;
-	  //	  cout << current->getNext()->getLabel() << endl;
-      }
-    //current is 0 and not firstnode
-      if (strcmp(current->getLabel(), firstnode) != 0 && current->getDistance() == 0 && extracounter < counter && strcmp(current->getLabel(), secondnode) != 0) {
-      cout << counter << endl;
-      extracounter++;
-      //if (current->getNext() != NULL) {
-      current = current->getNext();
-      //}
-    }
-    //current is secondnode and not zero
-      if (strcmp(current->getLabel(), secondnode) == 0) {
-      cout << "Second node" << endl;
-      if (current->getDistance() == 0) {
-      int fcounter = 0;
-      int scounter = 0;
-      int ncounter = 0;
-      Vertex* mover = root;
-      while (mover != NULL) {
-	
-	if (strcmp(mover->getLabel(), firstnode) == 0) {
-	  fcounter = counter;
-	}
-	if (strcmp(mover->getLabel(), secondnode) == 0) {
-	  scounter = counter;
-	}
-	counter++;
-	if (mover->getNext() == root) {
-	  mover->setNext(NULL);
-	}
-	mover = mover->getNext();
-      }
-      current->setDistance(array[fcounter][scounter]);
-      }
-      totaldistance = totaldistance + current->getDistance();
-      cout << "Total distance: " << totaldistance << endl;
-      return;
-    }
-
-    //current is not zero, not visited
-    //current's next is NULL
-      if (current->getDistance() != 0 && strcmp(firstnode, current->getLabel()) != 0 && strcmp(secondnode, current->getLabel()) != 0) {
-      cout << "non 0 node" << endl;
-      if (current->getVisited() == true) {
-	cout << "Skip" << endl;
-	//	if (current->getNext() == root) {
-	//current->setNext(NULL);
-        //}
-
-	current = current->getNext();
-      }
-      else {
-	if (current->getDistance() >= moverdistance) {
-	  cout << "Distance change" << current->getDistance() << endl;
-	  moverdistance = current->getDistance();
-	  totaldistance = totaldistance + moverdistance;
-	  strcpy(firstnode, current->getLabel());
-	  current = current->getNext();
-	}
-	else {
-	  cout << "Skip, not big enough" << endl;
-	  current = current->getNext();
-	}
-      }
-
-      }
-
-    if (current->getNext() == NULL || current->getNext() == root) {
-      //restart
-      cout << "End" << endl;
-      current->setNext(root);
-      current = current->getNext();
-      counter = 0;
-      moverdistance = 0;
-      firstcounter = 0;
-      done = false;
-      extracounter = 0;
-      //      totaldistance = totaldistance;
-    }
-    
-    //   cout << "Drop" << endl;
-
-    }
-
-//  cout << "Out of while loop" << endl;
-  
 }
-
-
+//main
 int main() {
   Vertex* root = NULL;
+  Vertex* path = NULL;
   int response;
   int array[20][20] = {0};
     cout << "Enter 1 to add vertex, 2 to add edge, 3 to remove vertex, 4 to remove edge, 5 to find shortest path, and 6 to print the adjacency table" << endl;
@@ -294,17 +403,22 @@ int main() {
   }
   if (response == 3) {
     cout << "Remove vertex" << endl;
+    deleteArray(root, array);
+    root = deleteList(root);
+    //cout << "New list: " << endl;
+    //printVertices(root);
     cout << "Enter 1 to add vertex, 2 to add edge, 3 to remove vertex, 4 to remove edge, 5 to find shortest path, and 6 to print the adjacency table" << endl;
   cin >> response;
   }
   if (response == 4) {
     cout << "Remove edge" << endl;
+    removeEdge(root, array);
     cout << "Enter 1 to add vertex, 2 to add edge, 3 to remove vertex, 4 to remove edge, 5 to find shortest path, and 6 to print the adjacency table" << endl;
   cin >> response;
   }
   if (response == 5) {
     cout << "Find shortest path" << endl;
-    shortestPath(root, array);
+    shortestPath(root, array, path);
     cout << "Enter 1 to add vertex, 2 to add edge, 3 to remove vertex, 4 to remove edge, 5 to find shortest path, and 6 to print the adjacency table" << endl;
   cin >> response;
   }
