@@ -10,6 +10,8 @@ class Vertex {
   ~Vertex();
   Vertex* getNext();
   void setNext(Vertex* newnext);
+  Vertex* getPrevious();
+  void setPrevious(Vertex* newprev);
   int getDistance();
   void setDistance(int d);
   int getEdge();
@@ -20,6 +22,7 @@ class Vertex {
   void setVisited(bool v);
  private:
   Vertex* next;
+  Vertex* prev;
   int edge;
   int distance;
   char label[1000];

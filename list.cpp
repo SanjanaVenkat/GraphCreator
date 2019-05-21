@@ -24,6 +24,14 @@ Vertex* Vertex::getNext() {
   return next;
 }
 
+void Vertex::setPrevious(Vertex* newprev) {
+  prev = newprev;
+}
+
+Vertex* Vertex::getPrevious() {
+  return prev;
+}
+
 void Vertex::setEdge(int e) {
   edge = e;
 }
