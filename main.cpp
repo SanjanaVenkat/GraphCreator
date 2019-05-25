@@ -9,6 +9,7 @@ using namespace std;
 //functions
 Vertex* addvertex(Vertex* root);
 void printVertices(Vertex* root);
+void printVerticesBack(Vertex* destVertex);
 void printTable(Vertex* root, int array[20][20]);
 int addEdge(Vertex* root, int array[20][20]);
 void shortestPath(Vertex* root, int array[20][20], Vertex*& path);
@@ -20,11 +21,12 @@ Vertex* addtoPath(Vertex* currentVertex, Vertex* path);
 int removeEdge(Vertex* root, int array[20][20]);
 Vertex* deleteList(Vertex* root);
 int deleteRoot(Vertex* root, int array[20][20]);
+Vertex* getShortestDistanceVertex(Vertex* root);
+
 //add vertex to one of the two linked lists
 Vertex* addvertex(Vertex* root) {
   char vertexlabel[1];
   Vertex* current = root;
-  Vertex* previous = root;
   cout << "Adding vertex" << endl;
   cout << "Enter a letter to be the label of your vertex" << endl;
   cin >> vertexlabel;
@@ -33,14 +35,11 @@ Vertex* addvertex(Vertex* root) {
   if (current == NULL) {
     current = vertex;
     root = current;
-    root->setPrevious(NULL);
   }
   else {
     while (current->getNext() != NULL) {
-      previous = current;
       current = current->getNext();
     }
-    current->setPrevious(previous);
     current->setNext(vertex);
   }
   return root;
@@ -48,14 +47,20 @@ Vertex* addvertex(Vertex* root) {
 //prints list of vertices from linked list
 void printVertices(Vertex* root) {
   Vertex* current = root;
-  while (current != NULL) {
-    current = current->getPrevious();
-  }
-  while (current != NULL) {
+    while (current != NULL) {
     cout << current->getLabel() << endl;
     current = current->getNext();
   }
   
+}
+
+void printVerticesBack(Vertex* destVertex) {
+  Vertex* current = destVertex;
+  while (current != NULL) {
+    cout << current->getLabel() << endl;
+    current = current->getPrevious();
+
+  }
 }
 //print adjacency table
 void printTable(Vertex* root, int array[20][20]) {
@@ -137,9 +142,7 @@ void shortestPath(Vertex* root, int array[20][20], Vertex*& path) {
   Vertex* shortestNextVertex = NULL;
   path = addtoPath(currentVertex, path);
   currentVertex->setVisited(true);
-  //  cout << "Printing vertices" << endl;
-  //printVertices(root);
-  //while not found
+   //while not found
   while (done == false) {
     //found destination
     if (currentIndex == destIndex) {
@@ -148,10 +151,8 @@ void shortestPath(Vertex* root, int array[20][20], Vertex*& path) {
     }
     shortestNextVertex = NULL;
     shortestNextDistance = 0;
-    //    cout <<"Current label   " <<  currentVertex->getLabel() << " " << currentIndex << endl;
-    //cout << "Destination   " << destIndex << "    " << destLabel << endl;
-    for (int i = 0; i < 20; i++) {
-
+     for (int i = 0; i < 20; i++) {
+       //no connection, move on
       if (array[currentIndex][i] == 0) {
         continue;
       }
@@ -159,79 +160,78 @@ void shortestPath(Vertex* root, int array[20][20], Vertex*& path) {
             if (i == currentIndex) {
 	continue;
       }
-	    //    cout << "I: " << i << endl;
       
       Vertex* nextVertex = getVertex(i, root);
-      //cout << "I2: " << i << endl;
-      //stop from crashing
+       //stop from crashing
       if (nextVertex == NULL) {
-	//	printVertices(root);
 	continue;
       }
       //skip if visited
       if (nextVertex->getVisited() == true) {
 	continue;
       }
-      //      cout << "Test 1" << endl;
       //change distance
       if (nextVertex->getDistance() == 0) {
-	//cout << "Test 2" << endl;
 	nextVertex->setDistance(currentVertex->getDistance() + array[currentIndex][i]);
-	//cout << "Next vertex: " << nextVertex->getLabel() << "    " << nextVertex->getDistance() << endl;
+	nextVertex->setPrevious(currentVertex);
       }
-      //longer distance, dont go this way
+      //longer distance, don't go this way
       else if (currentVertex->getDistance() + array[currentIndex][i] <= nextVertex->getDistance()) {
-	//cout << "Test 3" << endl;
 	nextVertex->setDistance(currentVertex->getDistance() + array[currentIndex][i]);
+	nextVertex->setPrevious(currentVertex);
       }
       //shorter distance, go this way
       if (shortestNextDistance == 0 || shortestNextDistance > nextVertex->getDistance()) {
-	//cout << "Test 4" << endl;
 	shortestNextDistance = nextVertex->getDistance();
 	shortestNextVertex = nextVertex;
       }
       
- 
-
-      
     }
+
+    currentVertex = getShortestDistanceVertex(root);
 
     //      cout << "Check: " << endl;
     //error
-      if (shortestNextVertex == NULL) {
+      if (currentVertex== NULL) {
 	// 	cout << "Error" << endl;
-	done = true;
+	break;
       }
-      else {
-	Vertex* currentholder = root;
-	int intcurrentholder = 0;
-	while (currentholder != NULL) {
-	  if (currentholder->getVisited() == false && currentholder->getDistance() != 0 && currentholder->getDistance() < intcurrentholder) {
-	    cout << "Test" << endl;
-	    currentVertex = currentholder;
-	    intcurrentholder = currentholder->getDistance();
-	    currentIndex = getIndex(currentholder, root);
-	    }
-	  
-	  currentholder = currentholder->getNext();
-	}
-	shortestNextVertex = currentVertex;
-	currentVertex->setVisited(true);
-	//      	cout << currentVertex->getLabel() << endl;
-	//	cout << "Test" << endl;
+      currentIndex = getIndex(currentVertex, root);
+      currentVertex->setVisited(true);
       }
-  }
   //print
-  cout << "Path" << endl;
-  printVertices(path);
+  cout << "Path (printed in reverse order)" << endl;
+  printVerticesBack(destvertex);
   cout << "Distance: " <<  destvertex->getDistance() << endl;
 }
+//gets the vertex with the shortest distance
+Vertex* getShortestDistanceVertex(Vertex* root) {
+  Vertex* current = root;
+  Vertex* shortestVertex = NULL;
+  int shortestDistance = -1;
+  while (current != NULL) {
+    if (current->getVisited() == false && current->getDistance() > 0) {
+      if (shortestDistance == -1) {
+	shortestDistance = current->getDistance();
+	shortestVertex = current;
+      }
+      else if (current->getDistance() < shortestDistance) {
+	shortestDistance = current->getDistance();
+	shortestVertex = current;
+      }
+    }
+    current = current->getNext();
+  }
+  return shortestVertex;
+}
+
 //clears vertices of linked list
 void clearVertices(Vertex* root) {
   Vertex* current = root;
   while (current != NULL) {
     current->setVisited(false);
     current->setDistance(0);
+    current->setPrevious(NULL);
     current = current->getNext();
   }
 }

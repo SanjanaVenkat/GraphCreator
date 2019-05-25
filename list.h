@@ -8,10 +8,10 @@ class Vertex {
  public:
   Vertex(char* l, int e, int d, bool v);
   ~Vertex();
+  Vertex* getPrevious();
+  void setPrevious(Vertex* newprevious);
   Vertex* getNext();
   void setNext(Vertex* newnext);
-  Vertex* getPrevious();
-  void setPrevious(Vertex* newprev);
   int getDistance();
   void setDistance(int d);
   int getEdge();
@@ -22,9 +22,9 @@ class Vertex {
   void setVisited(bool v);
  private:
   Vertex* next;
-  Vertex* prev;
   int edge;
   int distance;
   char label[1000];
   bool visited;
+  Vertex* previous;
 };
