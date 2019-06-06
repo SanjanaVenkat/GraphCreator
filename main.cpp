@@ -56,10 +56,14 @@ void printVertices(Vertex* root) {
 
 void printVerticesBack(Vertex* destVertex) {
   Vertex* current = destVertex;
+  if (current->getDistance() != 0) {
   while (current != NULL) {
     cout << current->getLabel() << endl;
     current = current->getPrevious();
-
+  }
+  }
+  else {
+    cout << "Path does not exist" << endl;
   }
 }
 //print adjacency table
@@ -200,10 +204,15 @@ void shortestPath(Vertex* root, int array[20][20], Vertex*& path) {
       currentVertex->setVisited(true);
       }
   //print
+  if (destvertex->getDistance() != 0) {
   cout << "Path (printed in reverse order)" << endl;
+  }
   printVerticesBack(destvertex);
+  
+  if (destvertex->getDistance() != 0) {
   cout << "Distance: " <<  destvertex->getDistance() << endl;
-}
+  }
+  }
 //gets the vertex with the shortest distance
 Vertex* getShortestDistanceVertex(Vertex* root) {
   Vertex* current = root;
